@@ -1,0 +1,390 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shubh Deepavali ✨ | For Purnima & Family</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Cinzel Decorative, Great Vibes, Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --gold-primary: #ffd700;
+      --gold-glow: rgba(255, 215, 0, 0.45);
+      --deep-maroon: #2a0208;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #4a0210 0%, #240108 55%, #100004 100%);
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-royal {
+      font-family: 'Cinzel Decorative', serif;
+    }
+
+    .font-handwriting {
+      font-family: 'Great Vibes', cursive;
+    }
+
+    /* Ambient Gold Shimmer Border */
+    .royal-card {
+      background: rgba(36, 1, 8, 0.78);
+      border: 1.5px solid rgba(255, 215, 0, 0.35);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(255, 215, 0, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Diya flame animation */
+    @keyframes flickerAnim {
+      0%, 100% {
+        transform: scale(1) rotate(-1.5deg);
+        filter: drop-shadow(0 0 10px #ffbb00) drop-shadow(0 0 22px #ff4500);
+      }
+      25% {
+        transform: scale(1.08, 0.94) rotate(1.5deg);
+        filter: drop-shadow(0 0 14px #ffd000) drop-shadow(0 0 28px #ff3300);
+      }
+      50% {
+        transform: scale(0.96, 1.06) rotate(-2deg);
+        filter: drop-shadow(0 0 8px #ffa500) drop-shadow(0 0 18px #e63946);
+      }
+      75% {
+        transform: scale(1.04, 0.98) rotate(1deg);
+        filter: drop-shadow(0 0 16px #ffea00) drop-shadow(0 0 32px #ff4800);
+      }
+    }
+
+    .flame-flicker {
+      animation: flickerAnim 0.75s infinite alternate ease-in-out;
+      transform-origin: bottom center;
+    }
+
+    /* Floating Golden Dust Particles */
+    .gold-particle {
+      position: absolute;
+      background: radial-gradient(circle, #fff3a8 0%, rgba(255, 215, 0, 0.75) 45%, rgba(255, 183, 3, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatSparkle linear infinite;
+    }
+
+    @keyframes floatSparkle {
+      0% {
+        transform: translateY(105vh) scale(0.4);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.9;
+      }
+      80% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(-8vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    /* Polaroid photo styling */
+    .polaroid-frame {
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 15px rgba(255, 215, 0, 0.2);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Royal Envelope 3D Fold Transition */
+    .envelope-lid {
+      transform-origin: top center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .envelope-opened .envelope-lid {
+      transform: rotateX(180deg);
+    }
+
+    /* Pulse Glow */
+    @keyframes goldenGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+      50% { box-shadow: 0 0 28px rgba(255, 215, 0, 0.7); }
+    }
+    .glow-gold {
+      animation: goldenGlow 2.5s infinite;
+    }
+  </style>
+</head>
+
+<body class="relative min-h-screen flex flex-col justify-between items-center px-4 py-3 selection:bg-amber-400 selection:text-black">
+
+  <!-- Ambient Golden Floating Particles -->
+  <div id="ambient-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+  <!-- Background Fireworks Canvas -->
+  <canvas id="fireworks-canvas" class="fixed inset-0 pointer-events-none z-10 w-full h-full"></canvas>
+
+  <!-- Top Festive Header & Audio Controls -->
+  <header class="w-full max-w-md mx-auto flex items-center justify-between py-2 z-30 relative">
+    <div class="flex items-center space-x-2">
+      <span class="text-2xl filter drop-shadow">🪔</span>
+      <span class="font-royal text-xs md:text-sm tracking-widest text-amber-300 font-bold">SHUBH DEEPAVALI</span>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <!-- Mute/Sound Toggle -->
+      <button id="sound-btn" onclick="toggleAudio()" class="w-9 h-9 rounded-full bg-amber-950/70 border border-amber-400/40 text-amber-300 flex items-center justify-center hover:bg-amber-900 transition backdrop-blur-md shadow-md text-sm" title="Toggle Festive Sound">
+        🔊
+      </button>
+      <!-- Direct QR Share Button -->
+      <button onclick="goToStage(7)" class="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-semibold text-xs flex items-center space-x-1 shadow-lg shadow-amber-500/25 active:scale-95 transition">
+        <span>Get QR 📱</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Progress Bar (7 Stages) -->
+  <div class="w-full max-w-md mx-auto mb-3 z-30">
+    <div class="flex justify-between items-center text-[10px] text-amber-300/80 font-medium tracking-wider mb-1 px-1">
+      <span id="step-title">Welcome</span>
+      <span id="step-counter">1 of 7</span>
+    </div>
+    <div class="w-full h-1.5 bg-black/50 rounded-full overflow-hidden border border-amber-500/30 p-[1px]">
+      <div id="progress-indicator" class="h-full bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-300 transition-all duration-500 rounded-full" style="width: 14%;"></div>
+    </div>
+  </div>
+
+  <!-- Main Multi-stage Interactive Container -->
+  <main class="w-full max-w-md mx-auto relative z-30 flex-1 flex flex-col justify-center my-auto">
+
+    <!-- ================= STAGE 1: COVER SCREEN ================= -->
+    <div id="stage-1" class="royal-card rounded-3xl p-6 text-center border flex flex-col items-center">
+      <!-- Traditional Floral Motif -->
+      <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-400/40 flex items-center justify-center mb-3 animate-pulse">
+        <svg class="w-9 h-9 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L14.2 7.5L20 8.2L15.6 12.1L17 18L12 14.8L7 18L8.4 12.1L4 8.2L9.8 7.5L12 2Z"/>
+        </svg>
+      </div>
+
+      <p class="text-[11px] tracking-widest text-amber-300 font-bold uppercase mb-1">A Divine Festive Greeting</p>
+      <h1 class="font-royal text-2xl md:text-3xl text-amber-100 leading-tight mb-2">
+        Happy Diwali to <br><span class="text-amber-300 font-extrabold">Purnima & Her Family!</span>
+      </h1>
+      <p class="text-amber-100/80 text-xs mb-5 font-light leading-relaxed">
+        May the festival of lights bring eternal peace, divine warmth, and abundant prosperity to your household.
+      </p>
+
+      <!-- Center Ornate Animated Diya Graphic -->
+      <div class="relative w-44 h-40 mb-5 flex items-center justify-center">
+        <!-- Glow Aura -->
+        <div class="absolute inset-0 bg-amber-500/20 rounded-full blur-2xl"></div>
+
+        <svg class="w-36 h-36 relative z-10" viewBox="0 0 120 120">
+          <!-- Diya Clay Body -->
+          <ellipse cx="60" cy="85" rx="46" ry="21" fill="#781d0f"/>
+          <ellipse cx="60" cy="82" rx="43" ry="17" fill="#a42813"/>
+          <ellipse cx="60" cy="80" rx="39" ry="12" fill="#d85023"/>
+          <ellipse cx="60" cy="79" rx="34" ry="7" fill="#f89e44"/>
+          <!-- Golden Border Beads -->
+          <circle cx="30" cy="83" r="2.2" fill="#ffd700"/>
+          <circle cx="42" cy="86" r="2.2" fill="#ffd700"/>
+          <circle cx="60" cy="87" r="2.5" fill="#ffd700"/>
+          <circle cx="78" cy="86" r="2.2" fill="#ffd700"/>
+          <circle cx="90" cy="83" r="2.2" fill="#ffd700"/>
+          <!-- Central Flame -->
+          <g class="flame-flicker" style="transform-origin: 60px 75px;">
+            <path d="M60 20 C68 36, 75 55, 60 75 C45 55, 52 36, 60 20 Z" fill="url(#mainDiyaFlame)"/>
+            <path d="M60 38 C65 48, 70 58, 60 73 C50 58, 55 48, 60 38 Z" fill="#ffffff" opacity="0.9"/>
+          </g>
+          <defs>
+            <linearGradient id="mainDiyaFlame" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fff8b5"/>
+              <stop offset="30%" stop-color="#ffb703"/>
+              <stop offset="75%" stop-color="#fb5607"/>
+              <stop offset="100%" stop-color="#d90429"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <p class="text-xs text-amber-200/90 font-medium mb-5">Are you ready for your Diwali surprise?</p>
+
+      <!-- Action Buttons with Dodge Feature -->
+      <div class="relative w-full flex items-center justify-center space-x-3">
+        <button onclick="goToStage(2)" class="flex-1 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-slate-950 font-bold text-xs md:text-sm tracking-wide shadow-xl shadow-orange-600/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center space-x-2">
+          <span>Yes, Let's Celebrate! 🪔</span>
+        </button>
+        <button id="not-yet-btn" onmouseenter="dodgeNotYet()" onclick="dodgeNotYet()" class="py-3 px-4 rounded-2xl bg-black/40 border border-amber-500/25 text-amber-300/70 text-xs font-semibold hover:border-amber-400 transition-all">
+          Not yet
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ================= STAGE 2: LIGHT THE 4 DIYAS ================= -->
+    <div id="stage-2" class="royal-card hidden rounded-3xl p-6 text-center border">
+      <div class="text-[10px] text-amber-300 font-bold uppercase tracking-widest mb-1">Interactive Blessing</div>
+      <h2 class="font-royal text-xl text-amber-100 mb-1">Light the 4 Holy Diyas</h2>
+      <p class="text-xs text-amber-100/75 mb-5 font-light">Tap each sacred diya to kindle eternal blessings for your family</p>
+
+      <!-- 4 Diyas Grid -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <!-- Diya 1 -->
+        <div id="diya-card-1" onclick="lightHolyDiya(1, 'Aarogya', 'Good Health & Energy 🌿')" class="bg-black/40 border border-amber-500/20 hover:border-amber-400/60 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 min-h-[145px]">
+          <div class="relative w-16 h-14 mb-1">
+            <div id="flame-1" class="hidden absolute -top-4 left-1/2 -translate-x-1/2 flame-flicker z-10">
+              <div class="w-5 h-9 bg-gradient-to-t from-orange-600 via-amber-400 to-yellow-100 rounded-full blur-[0.3px]"></div>
+            </div>
+            <svg class="w-16 h-14" viewBox="0 0 64 54">
+              <path d="M10 28 C10 44, 54 44, 54 28 C54 24, 10 24, 10 28 Z" fill="#80210e"/>
+              <ellipse cx="32" cy="27" rx="20" ry="5" fill="#ba3c1a"/>
+              <ellipse cx="32" cy="28" rx="15" ry="3" fill="#ffb703" opacity="0.7"/>
+            </svg>
+          </div>
+          <span id="diya-txt-1" class="text-[11px] text-slate-400 font-medium">Tap to light</span>
+          <div id="diya-bless-1" class="hidden text-center">
+            <div class="text-xs font-bold text-amber-300">Aarogya</div>
+            <div class="text-[10px] text-amber-100/80">Good Health 🌿</div>
+          </div>
+        </div>
+
+        <!-- Diya 2 -->
+        <div id="diya-card-2" onclick="lightHolyDiya(2, 'Samriddhi', 'Abundant Wealth 🪙')" class="bg-black/40 border border-amber-500/20 hover:border-amber-400/60 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 min-h-[145px]">
+          <div class="relative w-16 h-14 mb-1">
+            <div id="flame-2" class="hidden absolute -top-4 left-1/2 -translate-x-1/2 flame-flicker z-10">
+              <div class="w-5 h-9 bg-gradient-to-t from-orange-600 via-amber-400 to-yellow-100 rounded-full blur-[0.3px]"></div>
+            </div>
+            <svg class="w-16 h-14" viewBox="0 0 64 54">
+              <path d="M10 28 C10 44, 54 44, 54 28 C54 24, 10 24, 10 28 Z" fill="#80210e"/>
+              <ellipse cx="32" cy="27" rx="20" ry="5" fill="#ba3c1a"/>
+              <ellipse cx="32" cy="28" rx="15" ry="3" fill="#ffb703" opacity="0.7"/>
+            </svg>
+          </div>
+          <span id="diya-txt-2" class="text-[11px] text-slate-400 font-medium">Tap to light</span>
+          <div id="diya-bless-2" class="hidden text-center">
+            <div class="text-xs font-bold text-yellow-300">Samriddhi</div>
+            <div class="text-[10px] text-amber-100/80">Abundant Wealth 🪙</div>
+          </div>
+        </div>
+
+        <!-- Diya 3 -->
+        <div id="diya-card-3" onclick="lightHolyDiya(3, 'Anand', 'Pure Joy & Bliss 🎆')" class="bg-black/40 border border-amber-500/20 hover:border-amber-400/60 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 min-h-[145px]">
+          <div class="relative w-16 h-14 mb-1">
+            <div id="flame-3" class="hidden absolute -top-4 left-1/2 -translate-x-1/2 flame-flicker z-10">
+              <div class="w-5 h-9 bg-gradient-to-t from-orange-600 via-amber-400 to-yellow-100 rounded-full blur-[0.3px]"></div>
+            </div>
+            <svg class="w-16 h-14" viewBox="0 0 64 54">
+              <path d="M10 28 C10 44, 54 44, 54 28 C54 24, 10 24, 10 28 Z" fill="#80210e"/>
+              <ellipse cx="32" cy="27" rx="20" ry="5" fill="#ba3c1a"/>
+              <ellipse cx="32" cy="28" rx="15" ry="3" fill="#ffb703" opacity="0.7"/>
+            </svg>
+          </div>
+          <span id="diya-txt-3" class="text-[11px] text-slate-400 font-medium">Tap to light</span>
+          <div id="diya-bless-3" class="hidden text-center">
+            <div class="text-xs font-bold text-orange-300">Anand</div>
+            <div class="text-[10px] text-amber-100/80">Pure Joy 🎆</div>
+          </div>
+        </div>
+
+        <!-- Diya 4 -->
+        <div id="diya-card-4" onclick="lightHolyDiya(4, 'Prem', 'Endless Love & Harmony 💖')" class="bg-black/40 border border-amber-500/20 hover:border-amber-400/60 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 min-h-[145px]">
+          <div class="relative w-16 h-14 mb-1">
+            <div id="flame-4" class="hidden absolute -top-4 left-1/2 -translate-x-1/2 flame-flicker z-10">
+              <div class="w-5 h-9 bg-gradient-to-t from-orange-600 via-amber-400 to-yellow-100 rounded-full blur-[0.3px]"></div>
+            </div>
+            <svg class="w-16 h-14" viewBox="0 0 64 54">
+              <path d="M10 28 C10 44, 54 44, 54 28 C54 24, 10 24, 10 28 Z" fill="#80210e"/>
+              <ellipse cx="32" cy="27" rx="20" ry="5" fill="#ba3c1a"/>
+              <ellipse cx="32" cy="28" rx="15" ry="3" fill="#ffb703" opacity="0.7"/>
+            </svg>
+          </div>
+          <span id="diya-txt-4" class="text-[11px] text-slate-400 font-medium">Tap to light</span>
+          <div id="diya-bless-4" class="hidden text-center">
+            <div class="text-xs font-bold text-pink-300">Prem</div>
+            <div class="text-[10px] text-amber-100/80">Endless Love 💖</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Continue button appears once all 4 are lit -->
+      <button id="stage2-next-btn" onclick="goToStage(3)" disabled class="w-full py-3.5 rounded-2xl bg-black/40 border border-amber-500/20 text-slate-500 font-bold text-xs md:text-sm tracking-wide transition-all duration-300 cursor-not-allowed">
+        Light all 4 Diyas to continue 🪔
+      </button>
+    </div>
+
+
+    <!-- ================= STAGE 3: LIGHT THE GOLDEN ANAR (SPARKLER) ================= -->
+    <div id="stage-3" class="royal-card hidden rounded-3xl p-6 text-center border">
+      <div class="text-[10px] text-amber-300 font-bold uppercase tracking-widest mb-1">Fireworks Delight</div>
+      <h2 class="font-royal text-xl text-amber-100 mb-1">Light the Golden Anar</h2>
+      <p class="text-xs text-amber-100/75 mb-3 font-light">Tap repeatedly or hold the fountain cone to burst golden sparks!</p>
+
+      <!-- Sparkler Fountain Interactive Zone -->
+      <div id="anar-touch-box" class="relative w-full h-56 rounded-2xl bg-black/60 border border-amber-500/30 overflow-hidden cursor-pointer flex flex-col items-center justify-end mb-3">
+        <!-- Interactive Anar Spark Canvas -->
+        <canvas id="anar-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
+
+        <!-- Anar Cone SVG -->
+        <div id="anar-cone" class="relative z-20 mb-2 transition-transform duration-100 transform active:scale-95">
+          <svg class="w-20 h-28" viewBox="0 0 100 140">
+            <!-- Cone Base Body -->
+            <polygon points="50,15 12,130 88,130" fill="url(#anarBodyGrad)"/>
+            <!-- Golden Decorative Foil Bands -->
+            <polygon points="50,45 28,110 72,110" fill="#f59e0b" opacity="0.65"/>
+            <polygon points="50,70 38,98 62,98" fill="#fbbf24" opacity="0.85"/>
+            <!-- Fuse & Sparkling Tip -->
+            <line x1="50" y1="15" x2="50" y2="4" stroke="#ffedd5" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="4" r="5" fill="#f97316" class="animate-ping"/>
+            <defs>
+              <linearGradient id="anarBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#b91c1c"/>
+                <stop offset="50%" stop-color="#991b1b"/>
+                <stop offset="100%" stop-color="#450a0a"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <p class="text-[10px] text-amber-300/80 font-medium mb-2 z-20">✨ Tap rapidly on the Anar!</p>
+      </div>
+
+      <!-- Spark Fountain Fill Meter -->
+      <div class="w-full bg-black/60 rounded-full h-2.5 mb-4 p-[1px] border border-amber-500/30">
+        <div id="anar-progress-bar" class="bg-gradient-to-r from-amber-400 via-orange-500 to-yellow-200 h-full rounded-full transition-all duration-150" style="width: 15%;"></div>
+      </div>
+
+      <button id="stage3-next-btn" onclick="goToStage(4)" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-slate-950 font-bold text-xs md:text-sm tracking-wide shadow-lg shadow-orange-500/25 active:scale-95 transition">
+        Taste the Sweetness 🍬
+      </button>
+    </div>
+
+
+    <!-- ================= STAGE 4: SWEETS & FLOWER PLATTER ================= -->
+    <div id="stage-4" class="royal-card hidden rounded-3xl p-6 text-center border">
+      <div class="text-[10px] text-amber-300 font-bold uppercase tracking-widest mb-1">Auspicious Offering</div>
+      <h2 class="font-royal text-xl text-amber-100 mb-1">Festive Mithai & Flower Thali</h2>
+      <p class="text-xs text-amber-100/75 mb-4 font-light">Pick a Diwali sweet to receive its auspicious blessing</p>
+
+      <!-- Royal Brass Thali -->
+      <div class="relative w-64 h-64 mx-auto mb-4 rounded-full bg-gradient-to-b from-amber-700/40 via-yellow-900/30 to-black/60 p-3.5 border-4 border-dashed border-amber-400/50 flex flex-col items-center justify-center shadow-inner">
+        <!-- Marigold Flowers Ring -->
+        <div class="absolute inset-1.5 rounded-full border border-orange-400/30 pointer-events-none"></div>
+
+        <!-- Center Sacred Diya in Thali -->
+        <div class="w-10 h-10 flex items-center justify-center mb-1">
+          <span class="text-3xl animate-bounce">🪔</span>
+        </div>
+
+        <!-- Sweet Delights Grid -->
+        <div class
